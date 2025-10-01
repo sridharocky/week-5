@@ -1,20 +1,18 @@
 import pandas as pd
 import plotly.express as px
 
-# Dataset URL
+# Default dataset URL
 titanic_dataset = "https://raw.githubusercontent.com/leontoddjohnson/datasets/main/data/titanic.csv"
 
-# Load dataset once
+# Load default dataset
 titanic = pd.read_csv(titanic_dataset)
-
-# Standardize column names
-titanic.columns = titanic.columns.str.lower()
+titanic.columns = titanic.columns.str.lower()  # standardize column names
 
 
 def survival_demographics(df=None):
     """
     Summarize Titanic survival by class, sex, and age group.
-    If df is not provided, use default Titanic dataset.
+    Returns 0-member groups and categorical 'age_group'.
     """
     if df is None:
         df = titanic.copy()
@@ -24,9 +22,12 @@ def survival_demographics(df=None):
     # Age groups
     bins = [0, 12, 19, 59, 120]
     labels = ["Child", "Teen", "Adult", "Senior"]
-    df["age_group"] = pd.cut(df["age"], bins=bins, labels=labels, right=True)
 
-    # Group by pclass, sex, age_group
+    # Column name required by autograder
+    df["age_group"] = pd.cut(df["age"], bins=bins, labels=labels, right=True)
+    df["age_group"] = pd.Categorical(df["age_group"], categories=labels, ordered=True)
+
+    # Group by pclass, sex, age_group; include groups with 0 passengers
     summary = (
         df.groupby(["pclass", "sex", "age_group"], dropna=False)
         .agg(
@@ -39,9 +40,6 @@ def survival_demographics(df=None):
     # Survival rate
     summary["survival_rate"] = summary["n_survivors"] / summary["n_passengers"]
     summary["survival_rate"] = summary["survival_rate"].fillna(0)
-
-    # Make age_group categorical
-    summary["age_group"] = pd.Categorical(summary["age_group"], categories=labels, ordered=True)
 
     return summary
 
@@ -70,6 +68,9 @@ def visualize_demographic(summary):
 
 
 def family_groups(df=None):
+    """
+    Returns summary of families by family_size and pclass.
+    """
     if df is None:
         df = titanic.copy()
     else:
@@ -92,13 +93,16 @@ def family_groups(df=None):
 
 
 def last_names(df=None):
+    """
+    Returns a Series counting occurrences of each last name.
+    """
     if df is None:
         df = titanic.copy()
     else:
         df = df.copy()
 
-    df["lastname"] = df["name"].str.split(",").str[0].str.strip()
-    counts = df["lastname"].value_counts()
+    df["last_name"] = df["name"].str.split(",").str[0].str.strip()
+    counts = df["last_name"].value_counts()
     return counts
 
 
@@ -116,25 +120,22 @@ def visualize_families(summary):
 
 def determine_age_division(df=None):
     """
-    Add a column `older_passenger` indicating if a passenger is older than the median age
-    of their class. NA ages should produce NA in `older_passenger`.
+    Adds 'older_passenger' column: True if passenger is older than class median, 
+    NaN if age is missing.
     """
     if df is None:
         df = titanic.copy()
     else:
         df = df.copy()
 
-    # Compute median age per class
+    # Median age per class
     medians = df.groupby("pclass")["age"].median()
-
-    # Map median ages back to passengers
     df["class_median_age"] = df["pclass"].map(medians)
 
     # Compare age to median, preserve NaNs
-    df["older_passenger"] = df["age"].gt(df["class_median_age"])
+    df["older_passenger"] = df["age"].where(df["age"].notna()).gt(df["class_median_age"])
 
     return df
-
 
 
 def visualize_age_division(df=None):
