@@ -13,39 +13,75 @@ df = titanic
 print(titanic.columns)
 
 
-def survival_demographics():
+#def survival_demographics():
+#    """
+#    Analyze Titanic survival patterns by Pclass, Sex, and AgeGroup.
+#
+#    Parameters:
+#        titanic_dataset (str): Path to Titanic dataset.
+#
+#    Returns:
+#        pd.DataFrame: Summary of passengers, survivors, and survival rate.
+#    """
+#    # Load dataset
+#    df = pd.read_csv(titanic_dataset)
+#
+#    # Column with categories of ages
+#    bins = [0, 12, 19, 59, 120]
+#    labels = ["Child", "Teen", "Adult", "Senior"]
+#
+#    # 1. Create a categorical column named AgeGroup
+#    df["AgeGroup"] = pd.cut(df["Age"], bins=bins, labels=labels, right=True)
+#
+#    # 2, 3, 4, 5 creates a groups and is easy to interpret
+#    summary = (
+#        df.groupby(["Pclass", "Sex", "AgeGroup"])
+#        .agg(
+#            n_passengers=("PassengerId", "count"),
+#            n_survivors=("Survived", "sum"),
+#            survival_rate=("Survived", "mean"),
+#        )
+#        .reset_index()
+#        .sort_values(["Pclass", "Sex", "AgeGroup"])
+#    )
+#    print(summary)
+#    return summary
+
+def survival_demographics(df):
     """
-    Analyze Titanic survival patterns by Pclass, Sex, and AgeGroup.
+    Summarize Titanic survival by class, sex, and age group.
 
     Parameters:
-        titanic_dataset (str): Path to Titanic dataset.
+        df (pd.DataFrame): Titanic dataset
 
     Returns:
-        pd.DataFrame: Summary of passengers, survivors, and survival rate.
+        summary (pd.DataFrame): table with counts and survival rates
     """
-    # Load dataset
-    df = pd.read_csv(titanic_dataset)
+    # Standardize column names to lowercase
+    df = df.copy()
+    df.columns = df.columns.str.lower()
 
-    # Column with categories of ages
+    # Define age groups
     bins = [0, 12, 19, 59, 120]
     labels = ["Child", "Teen", "Adult", "Senior"]
+    df["agegroup"] = pd.cut(df["age"], bins=bins, labels=labels, right=True)
 
-    # 1. Create a categorical column named AgeGroup
-    df["AgeGroup"] = pd.cut(df["Age"], bins=bins, labels=labels, right=True)
-
-    # 2, 3, 4, 5 creates a groups and is easy to interpret
+    # Group by class, sex, and agegroup, including empty groups
     summary = (
-        df.groupby(["Pclass", "Sex", "AgeGroup"])
+        df.groupby(["pclass", "sex", "agegroup"], dropna=False)
         .agg(
-            n_passengers=("PassengerId", "count"),
-            n_survivors=("Survived", "sum"),
-            survival_rate=("Survived", "mean"),
+            n_passengers=("passengerid", "count"),
+            n_survivors=("survived", "sum")
         )
         .reset_index()
-        .sort_values(["Pclass", "Sex", "AgeGroup"])
     )
-    print(summary)
+
+    # Compute survival rate
+    summary["survival_rate"] = summary["n_survivors"] / summary["n_passengers"]
+    summary["survival_rate"] = summary["survival_rate"].fillna(0)
+
     return summary
+
 
 
 def visualize_demographic(summary):
