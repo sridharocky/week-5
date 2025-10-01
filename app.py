@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
-from exercise_1 import survival_demographics, visualize_demographic
-from exercise_2 import family_groups, last_names, visualize_families
-from bonus_exercise import determine_age_division, visualize_age_division
+from apputil import survival_demographics, visualize_demographic, family_groups 
+from apputil import last_names, visualize_families, determine_age_division, visualize_age_division
 
 ##------------------------------------
 ## Exercise 1
@@ -27,7 +26,12 @@ print(type(fig))
 ##------------------------------------
 
 # Load data
-df = pd.read_csv("train.csv")
+titanic_dataset = "https://raw.githubusercontent.com/leontoddjohnson/datasets/main/data/titanic.csv"
+
+df = pd.read_csv(titanic_dataset)
+
+
+
 
 # Family groups summary
 summary = family_groups(df)
