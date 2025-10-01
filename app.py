@@ -12,7 +12,7 @@ df = pd.read_csv(titanic_dataset)
 ## Exercise 1
 ##------------------------------------
 
-summary = survival_demographics()
+summary = survival_demographics(df)
 st.write("Exercise 1\n")
 
 # Pose your research question
@@ -24,7 +24,7 @@ st.dataframe(summary)
 # Show the chart
 fig = visualize_demographic(summary)
 st.plotly_chart(fig)
-print(type(fig))
+
 
 ##------------------------------------
 ## Exercise 2
