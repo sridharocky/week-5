@@ -115,15 +115,26 @@ def visualize_families(summary):
 
 
 def determine_age_division(df=None):
+    """
+    Add a column `older_passenger` indicating if a passenger is older than the median age
+    of their class. NA ages should produce NA in `older_passenger`.
+    """
     if df is None:
         df = titanic.copy()
     else:
         df = df.copy()
 
+    # Compute median age per class
     medians = df.groupby("pclass")["age"].median()
+
+    # Map median ages back to passengers
     df["class_median_age"] = df["pclass"].map(medians)
-    df["older_passenger"] = df["age"] > df["class_median_age"]
+
+    # Compare age to median, preserve NaNs
+    df["older_passenger"] = df["age"].gt(df["class_median_age"])
+
     return df
+
 
 
 def visualize_age_division(df=None):
