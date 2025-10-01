@@ -30,10 +30,6 @@ print(type(fig))
 ## Exercise 2
 ##------------------------------------
 
-
-
-
-
 # Family groups summary
 summary = family_groups(df)
 st.write("\nExercise 2\n")
