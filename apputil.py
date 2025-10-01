@@ -24,11 +24,11 @@ def survival_demographics(df=None):
     # Age groups
     bins = [0, 12, 19, 59, 120]
     labels = ["Child", "Teen", "Adult", "Senior"]
-    df["agegroup"] = pd.cut(df["age"], bins=bins, labels=labels, right=True)
+    df["age_group"] = pd.cut(df["age"], bins=bins, labels=labels, right=True)
 
-    # Group by pclass, sex, agegroup
+    # Group by pclass, sex, age_group
     summary = (
-        df.groupby(["pclass", "sex", "agegroup"], dropna=False)
+        df.groupby(["pclass", "sex", "age_group"], dropna=False)
         .agg(
             n_passengers=("passengerid", "count"),
             n_survivors=("survived", "sum")
@@ -40,8 +40,8 @@ def survival_demographics(df=None):
     summary["survival_rate"] = summary["n_survivors"] / summary["n_passengers"]
     summary["survival_rate"] = summary["survival_rate"].fillna(0)
 
-    # Make agegroup categorical
-    summary["agegroup"] = pd.Categorical(summary["agegroup"], categories=labels, ordered=True)
+    # Make age_group categorical
+    summary["age_group"] = pd.Categorical(summary["age_group"], categories=labels, ordered=True)
 
     return summary
 
@@ -49,14 +49,14 @@ def survival_demographics(df=None):
 def visualize_demographic(summary):
     fig = px.bar(
         summary,
-        x="agegroup",
+        x="age_group",
         y="survival_rate",
         color="sex",
         barmode="group",
         facet_col="pclass",
         facet_col_wrap=1,
         text="n_survivors",
-        category_orders={"agegroup": ["Child", "Teen", "Adult", "Senior"]},
+        category_orders={"age_group": ["Child", "Teen", "Adult", "Senior"]},
         labels={
             "survival_rate": "Survival Rate",
             "n_survivors": "Survivors",
